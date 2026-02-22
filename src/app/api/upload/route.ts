@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveFileLocally, base64ToBuffer, getFileType } from '@/lib/localStorage'
+import { uploadToS3, base64ToBuffer, getMimeTypeFromBase64 } from '@/lib/s3'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,11 +15,11 @@ export async function POST(request: NextRequest) {
     // Конвертируем base64 в Buffer
     const buffer = base64ToBuffer(file)
     
-    // Определяем тип файла (audio или images)
-    const fileType = getFileType(file)
+    // Определяем MIME тип
+    const contentType = getMimeTypeFromBase64(file)
 
-    // Сохраняем локально
-    const fileUrl = await saveFileLocally(buffer, fileName, fileType)
+    // Загружаем в S3
+    const fileUrl = await uploadToS3(buffer, fileName, contentType)
 
     return NextResponse.json({ url: fileUrl })
   } catch (error) {
