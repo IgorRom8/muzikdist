@@ -1,0 +1,9 @@
+@echo off
+echo Adding files...
+git add -A
+echo Committing...
+git commit -m "Add logging and fix S3 ACL for Selectel"
+echo Pushing...
+git push
+echo Done!
+pause

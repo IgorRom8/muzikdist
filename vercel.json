@@ -2,5 +2,6 @@
   "buildCommand": "prisma generate && prisma migrate deploy && next build",
   "env": {
     "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true"
-  }
+  },
+  "framework": "nextjs"
 }

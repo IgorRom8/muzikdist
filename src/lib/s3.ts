@@ -20,20 +20,37 @@ export async function uploadToS3(
   fileName: string,
   contentType: string
 ): Promise<string> {
-  const key = `${Date.now()}-${fileName}`
+  try {
+    console.log('S3 Config:', {
+      region: process.env.AWS_REGION,
+      endpoint: process.env.S3_ENDPOINT,
+      bucket: BUCKET_NAME,
+      hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+      hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+    })
 
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    Body: file,
-    ContentType: contentType,
-    ACL: 'public-read' // Делаем файл публично доступным
-  })
+    const key = `${Date.now()}-${fileName}`
 
-  await s3Client.send(command)
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: file,
+      ContentType: contentType
+      // Убрали ACL - может не поддерживаться Selectel
+    })
 
-  // Возвращаем публичный URL для кастомного endpoint
-  return `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
+    console.log('Sending to S3...')
+    await s3Client.send(command)
+    console.log('S3 upload successful')
+
+    // Возвращаем публичный URL для кастомного endpoint
+    const url = `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
+    console.log('File URL:', url)
+    return url
+  } catch (error) {
+    console.error('S3 upload error:', error)
+    throw error
+  }
 }
 
 // Удаление файла из S3
