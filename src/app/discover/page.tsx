@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { usePlayer } from '@/context/PlayerContext'
 import Sidebar from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
@@ -9,7 +9,7 @@ import TrackCard from '@/components/TrackCard'
 import { Track } from '@/types'
 import styles from './discover.module.css'
 
-export default function DiscoverPage() {
+function DiscoverContent() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { setQueue } = usePlayer()
@@ -71,5 +71,13 @@ export default function DiscoverPage() {
       </div>
       <Player />
     </div>
+  )
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense fallback={<div>Загрузка...</div>}>
+      <DiscoverContent />
+    </Suspense>
   )
 }

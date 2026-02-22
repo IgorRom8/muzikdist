@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { usePlayer } from '@/context/PlayerContext'
 import Sidebar from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
@@ -9,7 +9,7 @@ import TrackCard from '@/components/TrackCard'
 import { Track } from '@/types'
 import styles from './page.module.css'
 
-export default function Home() {
+function HomeContent() {
   const { setQueue } = usePlayer()
   const [tracks, setTracks] = useState<Track[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -61,5 +61,13 @@ export default function Home() {
       </div>
       <Player />
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Загрузка...</div>}>
+      <HomeContent />
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { usePlayer } from '@/context/PlayerContext'
@@ -131,7 +131,9 @@ export default function PlaylistDetailPage() {
     <div className={styles.app}>
       <Sidebar />
       <div className={styles.mainContent}>
-        <TopBar />
+        <Suspense fallback={<div>Загрузка...</div>}>
+          <TopBar />
+        </Suspense>
         <div className={styles.content}>
           <div className={styles.header}>
             <div>

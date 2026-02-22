@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Sidebar from '@/components/Sidebar'
@@ -121,7 +121,9 @@ export default function ProfilePage() {
     <div className={styles.app}>
       <Sidebar />
       <div className={styles.mainContent}>
-        <TopBar />
+        <Suspense fallback={<div>Загрузка...</div>}>
+          <TopBar />
+        </Suspense>
         <div className={styles.content}>
           <h1 className={styles.title}>Профиль пользователя</h1>
 
