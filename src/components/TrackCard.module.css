@@ -1,0 +1,218 @@
+.card {
+  background: linear-gradient(to bottom, #ece9d8 0%, #d8d5c8 100%);
+  border: 2px solid;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  border-radius: 0;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  background: linear-gradient(to bottom, #f7f6f0 0%, #ece9d8 100%);
+  transform: translateY(-2px);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card:active {
+  border-top-color: #808080;
+  border-left-color: #808080;
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+  transform: translateY(0);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.coverContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  border-radius: 0;
+  border: 1px solid #808080;
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #d8d5c8 0%, #ece9d8 100%);
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: #808080;
+}
+
+.playOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 84, 227, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .playOverlay {
+  opacity: 1;
+}
+
+.playButton {
+  background: linear-gradient(to bottom, #ece9d8 0%, #d8d5c8 100%);
+  border: 1px solid;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  color: #000000;
+  width: 48px;
+  height: 48px;
+  border-radius: 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+}
+
+.playButton:hover {
+  background: linear-gradient(to bottom, #f7f6f0 0%, #ece9d8 100%);
+  transform: scale(1.05);
+}
+
+.playButton:active {
+  border-top-color: #808080;
+  border-left-color: #808080;
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.title {
+  color: #000000;
+  font-size: 0.95rem;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist {
+  color: #000000;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uploader {
+  color: #0054e3;
+  font-size: 0.8rem;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.duration {
+  color: #808080;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.actions {
+  position: relative;
+  margin-top: 8px;
+}
+
+.addButton {
+  padding: 4px 10px;
+  background: #ece9d8;
+  border: 2px solid #808080;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  border-right-color: #000;
+  border-bottom-color: #000;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  color: #000;
+  width: 100%;
+}
+
+.addButton:hover {
+  background: #ddd;
+}
+
+.addButton:active {
+  border-top-color: #000;
+  border-left-color: #000;
+  border-right-color: #fff;
+  border-bottom-color: #fff;
+}
+
+.playlistMenu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 5px;
+  background: #ece9d8;
+  border: 2px solid #808080;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  border-right-color: #000;
+  border-bottom-color: #000;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.playlistMenuItem {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  background: #ece9d8;
+  border: none;
+  text-align: left;
+  font-family: Tahoma, sans-serif;
+  font-size: 12px;
+  color: #000;
+}
+
+.playlistMenuItem:hover {
+  background: #0054e3;
+  color: #fff;
+}
+
+.noPlaylists {
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #666;
+}
