@@ -9,6 +9,8 @@ import TrackCard from '@/components/TrackCard'
 import { Track } from '@/types'
 import styles from './search.module.css'
 
+export const dynamic = 'force-dynamic'
+
 function SearchContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get('q') || ''
@@ -72,7 +74,9 @@ export default function SearchPage() {
     <div className={styles.app}>
       <Sidebar />
       <div className={styles.mainContent}>
-        <TopBar />
+        <Suspense fallback={<div>Загрузка...</div>}>
+          <TopBar />
+        </Suspense>
         <div className={styles.content}>
           <Suspense fallback={<p className={styles.loadingMessage}>Загрузка...</p>}>
             <SearchContent />

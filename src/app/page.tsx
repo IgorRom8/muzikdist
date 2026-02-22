@@ -9,6 +9,8 @@ import TrackCard from '@/components/TrackCard'
 import { Track } from '@/types'
 import styles from './page.module.css'
 
+export const dynamic = 'force-dynamic'
+
 function HomeContent() {
   const { setQueue } = usePlayer()
   const [tracks, setTracks] = useState<Track[]>([])

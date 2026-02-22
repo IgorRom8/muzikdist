@@ -9,6 +9,8 @@ import TrackCard from '@/components/TrackCard'
 import { Track } from '@/types'
 import styles from './discover.module.css'
 
+export const dynamic = 'force-dynamic'
+
 function DiscoverContent() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [isLoading, setIsLoading] = useState(true)

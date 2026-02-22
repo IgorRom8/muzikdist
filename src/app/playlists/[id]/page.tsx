@@ -10,6 +10,8 @@ import Player from '@/components/Player'
 import { Track } from '@/types'
 import styles from './playlist.module.css'
 
+export const dynamic = 'force-dynamic'
+
 interface PlaylistTrack {
   id: string
   track: Track
@@ -113,7 +115,9 @@ export default function PlaylistDetailPage() {
       <div className={styles.app}>
         <Sidebar />
         <div className={styles.mainContent}>
-          <TopBar />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <TopBar />
+          </Suspense>
           <div className={styles.content}>
             <h1 className={styles.title}>Загрузка...</h1>
           </div>

@@ -8,6 +8,8 @@ import TopBar from '@/components/TopBar'
 import Player from '@/components/Player'
 import styles from './playlists.module.css'
 
+export const dynamic = 'force-dynamic'
+
 interface Playlist {
   id: string
   name: string
@@ -129,7 +131,9 @@ export default function PlaylistsPage() {
       <div className={styles.app}>
         <Sidebar />
         <div className={styles.mainContent}>
-          <TopBar />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <TopBar />
+          </Suspense>
           <div className={styles.content}>
             <h1 className={styles.title}>Загрузка...</h1>
           </div>
