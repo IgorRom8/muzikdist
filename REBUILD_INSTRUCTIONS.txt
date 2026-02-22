@@ -1,0 +1,26 @@
+КРИТИЧЕСКИ ВАЖНО: Vercel использует старый код!
+
+Ошибка: "Error saving file locally" означает что используется localStorage.ts вместо s3.ts
+
+РЕШЕНИЕ:
+
+1. Запушьте изменения:
+   git add -A
+   git commit -m "Force rebuild with unique build ID"
+   git push
+
+2. В Vercel Dashboard:
+   - Откройте https://vercel.com/dashboard
+   - Выберите проект muzikdist
+   - Deployments → последний деплой
+   - Три точки (⋯) → Redeploy
+   - ОБЯЗАТЕЛЬНО выберите: "Redeploy with existing Build Cache cleared" ✓✓✓
+   
+3. Дождитесь завершения деплоя
+
+4. Проверьте /api/test-s3 - должно показать все переменные
+
+Если не помогло:
+- Settings → General → Build Command → измените на: npm run vercel-build
+- Сохраните
+- Снова Redeploy с очисткой кеша
