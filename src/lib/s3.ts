@@ -35,18 +35,28 @@ export async function uploadToS3(
       Bucket: BUCKET_NAME,
       Key: key,
       Body: file,
-      ContentType: contentType
-      // Убрали ACL - может не поддерживаться Selectel
+      ContentType: contentType,
+      // Пробуем добавить метаданные для публичного доступа
+      Metadata: {
+        'Cache-Control': 'public, max-age=31536000'
+      }
     })
 
     console.log('Sending to S3...')
     await s3Client.send(command)
     console.log('S3 upload successful')
 
-    // Возвращаем публичный URL для кастомного endpoint
-    const url = `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
-    console.log('File URL:', url)
-    return url
+    // Формируем URL для Selectel (может быть разный формат)
+    // Вариант 1: https://s3.ru-7.storage.selcloud.ru/bucket/key
+    const url1 = `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
+    // Вариант 2: https://bucket.s3.ru-7.storage.selcloud.ru/key
+    const url2 = `https://${BUCKET_NAME}.${S3_ENDPOINT}/${key}`
+    
+    console.log('File URL (path-style):', url1)
+    console.log('File URL (virtual-hosted):', url2)
+    
+    // Используем path-style (forcePathStyle: true)
+    return url1
   } catch (error) {
     console.error('S3 upload error:', error)
     throw error
