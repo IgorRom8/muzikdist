@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Track } from '@/types'
 import { usePlayer } from '@/context/PlayerContext'
 import { useAuth } from '@/context/AuthContext'
-import { getFileUrl } from '@/lib/fileUrl'
 import styles from './TrackCard.module.css'
 
 interface TrackCardProps {
@@ -95,7 +94,7 @@ export default function TrackCard({ track }: TrackCardProps) {
       <div className={styles.coverContainer} onClick={handleClick}>
         {track.coverUrl ? (
           <img 
-            src={getFileUrl(track.coverUrl)} 
+            src={track.coverUrl} 
             alt={track.title} 
             className={styles.cover}
             onError={handleImageError}

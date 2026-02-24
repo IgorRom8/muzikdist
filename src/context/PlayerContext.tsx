@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react'
 import { Track } from '@/types'
-import { getFileUrl } from '@/lib/fileUrl'
 
 interface PlayerContextType {
   currentTrack: Track | null
@@ -125,12 +124,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           audio.pause()
           audio.currentTime = 0
           
-          // Конвертируем S3 ключ в URL
-          const audioUrl = getFileUrl(currentTrack.audioUrl)
-          console.log('Loading audio:', audioUrl)
+          console.log('Loading audio:', currentTrack.audioUrl)
           
           // Загружаем новый трек
-          audio.src = audioUrl
+          audio.src = currentTrack.audioUrl
           await audio.load()
         }
 
