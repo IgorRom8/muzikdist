@@ -46,17 +46,14 @@ export async function uploadToS3(
     await s3Client.send(command)
     console.log('S3 upload successful')
 
-    // Формируем URL для Selectel (может быть разный формат)
-    // Вариант 1: https://s3.ru-7.storage.selcloud.ru/bucket/key
-    const url1 = `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
-    // Вариант 2: https://bucket.s3.ru-7.storage.selcloud.ru/key
-    const url2 = `https://${BUCKET_NAME}.${S3_ENDPOINT}/${key}`
+    // Используем прокси URL вместо прямого доступа к S3
+    // Это обходит проблемы с CORS и публичным доступом
+    const proxyUrl = `/api/proxy-file?key=${encodeURIComponent(key)}`
     
-    console.log('File URL (path-style):', url1)
-    console.log('File URL (virtual-hosted):', url2)
+    console.log('File key:', key)
+    console.log('Proxy URL:', proxyUrl)
     
-    // Используем path-style (forcePathStyle: true)
-    return url1
+    return proxyUrl
   } catch (error) {
     console.error('S3 upload error:', error)
     throw error
