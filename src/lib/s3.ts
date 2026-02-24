@@ -46,14 +46,12 @@ export async function uploadToS3(
     await s3Client.send(command)
     console.log('S3 upload successful')
 
-    // Используем прокси URL вместо прямого доступа к S3
-    // Это обходит проблемы с CORS и публичным доступом
-    const proxyUrl = `/api/proxy-file?key=${encodeURIComponent(key)}`
-    
+    // Сохраняем только ключ файла, а не полный URL
+    // Это позволит легко переключаться между прокси и прямым доступом
     console.log('File key:', key)
-    console.log('Proxy URL:', proxyUrl)
     
-    return proxyUrl
+    // Возвращаем ключ с префиксом для идентификации
+    return `s3://${key}`
   } catch (error) {
     console.error('S3 upload error:', error)
     throw error
