@@ -1,25 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// Утилита для конвертации URL
-function convertS3KeyToUrl(s3Key: string): string {
-  if (!s3Key) return ''
-  
-  // Если это уже полный URL, возвращаем как есть
-  if (s3Key.startsWith('http://') || s3Key.startsWith('https://')) {
-    return s3Key
-  }
-
-  // Если это S3 ключ с префиксом s3://
-  if (s3Key.startsWith('s3://')) {
-    const key = s3Key.replace('s3://', '')
-    return `/api/proxy-file?key=${encodeURIComponent(key)}`
-  }
-
-  // Если это просто ключ без префикса
-  return `/api/proxy-file?key=${encodeURIComponent(s3Key)}`
-}
-
 export async function GET() {
   try {
     // Получаем все треки
@@ -28,19 +9,27 @@ export async function GET() {
     let updated = 0
     let errors = 0
 
-    // Обновляем треки с s3:// URL
+    // Обновляем треки с s3:// URL или прямыми S3 URL
     for (const track of tracks) {
       try {
         const needsUpdate = 
           track.audioUrl.startsWith('s3://') || 
-          (track.coverUrl && track.coverUrl.startsWith('s3://'))
+          track.audioUrl.includes('s3.ru-7.storage.selcloud.ru') ||
+          (track.coverUrl && (
+            track.coverUrl.startsWith('s3://') || 
+            track.coverUrl.includes('s3.ru-7.storage.selcloud.ru')
+          ))
 
         if (needsUpdate) {
+          // Извлекаем ключ из URL
+          const audioKey = extractKeyFromUrl(track.audioUrl)
+          const coverKey = track.coverUrl ? extractKeyFromUrl(track.coverUrl) : null
+
           await prisma.track.update({
             where: { id: track.id },
             data: {
-              audioUrl: convertS3KeyToUrl(track.audioUrl),
-              coverUrl: track.coverUrl ? convertS3KeyToUrl(track.coverUrl) : null
+              audioUrl: `/api/proxy-file?key=${encodeURIComponent(audioKey)}`,
+              coverUrl: coverKey ? `/api/proxy-file?key=${encodeURIComponent(coverKey)}` : null
             }
           })
           updated++
@@ -65,4 +54,24 @@ export async function GET() {
       { status: 500 }
     )
   }
+}
+
+// Извлекает ключ из различных форматов URL
+function extractKeyFromUrl(url: string): string {
+  if (url.startsWith('s3://')) {
+    return url.replace('s3://', '')
+  }
+  
+  if (url.includes('/api/proxy-file?key=')) {
+    const urlObj = new URL(url, 'http://localhost')
+    return decodeURIComponent(urlObj.searchParams.get('key') || '')
+  }
+  
+  if (url.includes('s3.ru-7.storage.selcloud.ru')) {
+    // Извлекаем ключ из URL вида: https://s3.ru-7.storage.selcloud.ru/s3-muzik/key
+    const parts = url.split('/')
+    return parts[parts.length - 1]
+  }
+  
+  return url
 }
