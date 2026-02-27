@@ -30,7 +30,10 @@ export async function GET() {
       forcePathStyle: true
     })
 
-    let s3Test = { success: false, error: null }
+    let s3Test: { success: boolean; error: { message: string; code: string; statusCode?: number } | null } = { 
+      success: false, 
+      error: null 
+    }
     
     try {
       // Проверяем доступ к bucket
@@ -43,8 +46,8 @@ export async function GET() {
       s3Test = { 
         success: false, 
         error: {
-          message: error.message,
-          code: error.Code || error.code || error.name,
+          message: error.message || 'Unknown error',
+          code: error.Code || error.code || error.name || 'Unknown',
           statusCode: error.$metadata?.httpStatusCode
         }
       }
