@@ -47,14 +47,14 @@ export async function uploadToS3(
     await s3Client.send(command)
     console.log('S3 upload successful')
 
-    // Формируем прямой публичный URL для Selectel
-    // Path-style URL для S3-совместимых хранилищ
-    const publicUrl = `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
+    // Формируем URL через прокси API для обхода CORS
+    // Это решает проблему ERR_BLOCKED_BY_ORB в Chrome
+    const proxyUrl = `/api/proxy-file?key=${encodeURIComponent(key)}`
     
     console.log('File key:', key)
-    console.log('Public URL:', publicUrl)
+    console.log('Proxy URL:', proxyUrl)
     
-    return publicUrl
+    return proxyUrl
   } catch (error) {
     console.error('S3 upload error:', error)
     throw error
