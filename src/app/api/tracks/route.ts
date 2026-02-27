@@ -17,14 +17,7 @@ export async function GET() {
       }
     })
 
-    // Конвертируем S3 ключи в URL для клиента
-    const tracksWithUrls = tracks.map(track => ({
-      ...track,
-      audioUrl: convertS3KeyToUrl(track.audioUrl),
-      coverUrl: track.coverUrl ? convertS3KeyToUrl(track.coverUrl) : null
-    }))
-
-    return NextResponse.json(tracksWithUrls)
+    return NextResponse.json(tracks)
   } catch (error) {
     console.error('Error fetching tracks:', error)
     return NextResponse.json(
@@ -32,23 +25,6 @@ export async function GET() {
       { status: 500 }
     )
   }
-}
-
-// Конвертирует S3 ключ в URL
-function convertS3KeyToUrl(s3Key: string): string {
-  // Если это уже полный URL, возвращаем как есть
-  if (s3Key.startsWith('http://') || s3Key.startsWith('https://')) {
-    return s3Key
-  }
-
-  // Если это S3 ключ с префиксом s3://
-  if (s3Key.startsWith('s3://')) {
-    const key = s3Key.replace('s3://', '')
-    return `/api/proxy-file?key=${encodeURIComponent(key)}`
-  }
-
-  // Если это просто ключ без префикса
-  return `/api/proxy-file?key=${encodeURIComponent(s3Key)}`
 }
 
 // POST create new track

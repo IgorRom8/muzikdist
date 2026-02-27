@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Создаем S3 клиент с кастомным endpoint
 export const s3Client = new S3Client({
@@ -46,12 +47,14 @@ export async function uploadToS3(
     await s3Client.send(command)
     console.log('S3 upload successful')
 
-    // Сохраняем только ключ файла, а не полный URL
-    // Это позволит легко переключаться между прокси и прямым доступом
-    console.log('File key:', key)
+    // Формируем прямой публичный URL для Selectel
+    // Path-style URL для S3-совместимых хранилищ
+    const publicUrl = `https://${S3_ENDPOINT}/${BUCKET_NAME}/${key}`
     
-    // Возвращаем ключ с префиксом для идентификации
-    return `s3://${key}`
+    console.log('File key:', key)
+    console.log('Public URL:', publicUrl)
+    
+    return publicUrl
   } catch (error) {
     console.error('S3 upload error:', error)
     throw error
