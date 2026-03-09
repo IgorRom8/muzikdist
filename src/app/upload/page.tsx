@@ -87,45 +87,68 @@ function UploadContent() {
       // Получаем длительность аудио
       const duration = await getAudioDuration(selectedFile)
 
-      // Загружаем аудиофайл в S3
-      const audioBase64 = await fileToBase64(selectedFile)
-      const audioUploadResponse = await fetch('/api/upload', {
+      // Загружаем аудиофайл напрямую в S3
+      console.log('Uploading audio file...')
+      const audioUploadUrl = await fetch('/api/upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          file: audioBase64,
           fileName: selectedFile.name,
           fileType: selectedFile.type
         })
       })
 
-      if (!audioUploadResponse.ok) {
-        throw new Error('Ошибка загрузки аудиофайла')
+      if (!audioUploadUrl.ok) {
+        throw new Error('Ошибка получения URL для загрузки аудио')
       }
 
-      const { url: audioUrl } = await audioUploadResponse.json()
+      const { uploadUrl: audioUploadUrlSigned, fileUrl: audioUrl } = await audioUploadUrl.json()
+
+      // Загружаем файл напрямую в S3
+      const audioUploadResponse = await fetch(audioUploadUrlSigned, {
+        method: 'PUT',
+        body: selectedFile,
+        headers: {
+          'Content-Type': selectedFile.type
+        }
+      })
+
+      if (!audioUploadResponse.ok) {
+        throw new Error('Ошибка загрузки аудиофайла в S3')
+      }
 
       // Загружаем обложку в S3 (если есть)
       let coverUrl = ''
       if (coverFile) {
-        const coverBase64 = await fileToBase64(coverFile)
-        const coverUploadResponse = await fetch('/api/upload', {
+        console.log('Uploading cover image...')
+        const coverUploadUrl = await fetch('/api/upload-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            file: coverBase64,
             fileName: coverFile.name,
             fileType: coverFile.type
           })
         })
 
-        if (coverUploadResponse.ok) {
-          const coverData = await coverUploadResponse.json()
-          coverUrl = coverData.url
+        if (coverUploadUrl.ok) {
+          const { uploadUrl: coverUploadUrlSigned, fileUrl: coverFileUrl } = await coverUploadUrl.json()
+          
+          const coverUploadResponse = await fetch(coverUploadUrlSigned, {
+            method: 'PUT',
+            body: coverFile,
+            headers: {
+              'Content-Type': coverFile.type
+            }
+          })
+
+          if (coverUploadResponse.ok) {
+            coverUrl = coverFileUrl
+          }
         }
       }
 
       // Создаем трек в базе данных
+      console.log('Creating track in database...')
       const response = await fetch('/api/tracks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,10 +177,13 @@ function UploadContent() {
       setGenre('')
       setCoverFile(null)
 
+      alert('Трек успешно загружен!')
+
       // Перенаправляем на главную
       router.push('/')
     } catch (error) {
       console.error('Ошибка загрузки:', error)
+      alert(error instanceof Error ? error.message : 'Ошибка загрузки')
     } finally {
       setIsUploading(false)
     }
