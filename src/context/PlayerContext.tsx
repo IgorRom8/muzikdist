@@ -93,23 +93,31 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.load()
       setCurrentTime(0)
       setDuration(0)
+      // Автоматически играем после загрузки если isPlaying
+      if (isPlayingRef.current) {
+        audio.addEventListener('canplay', () => {
+          audio.play().catch(() => {})
+        }, { once: true })
+      }
     }
   }, [currentTrack])
 
-  // Управляем play/pause отдельно
+  // Управляем только play/pause — не зависим от currentTrack
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio || !currentTrack) return
+    if (!audio) return
 
     if (isPlaying) {
-      audio.play().catch(err => {
-        if (err.name !== 'AbortError') console.error('Play error:', err)
-        setIsPlaying(false)
-      })
+      if (audio.paused && audio.src) {
+        audio.play().catch(err => {
+          if (err.name !== 'AbortError') console.error('Play error:', err)
+          setIsPlaying(false)
+        })
+      }
     } else {
       audio.pause()
     }
-  }, [isPlaying, currentTrack])
+  }, [isPlaying])
 
   const playTrack = (track: Track) => {
     setCurrentTrack(track)
@@ -156,7 +164,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const seek = (time: number) => {
     if (audioRef.current) {
       audioRef.current.currentTime = time
-      setCurrentTime(time)
     }
   }
 
