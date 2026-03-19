@@ -9,7 +9,10 @@ const s3Client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
   },
-  forcePathStyle: true
+  forcePathStyle: true,
+  // Отключаем автоматический checksum — он добавляет заголовки вызывающие CORS preflight
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
 })
 
 export async function POST(request: NextRequest) {
@@ -33,8 +36,12 @@ export async function POST(request: NextRequest) {
       ContentType: fileType
     })
 
-    // Генерируем presigned URL (действителен 5 минут)
-    const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 })
+    // Генерируем presigned URL (действителен 15 минут)
+    const uploadUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 900,
+      // Не подписываем Content-Type чтобы избежать preflight
+      unhoistableHeaders: new Set(['content-type']),
+    })
 
     // Формируем URL для доступа к файлу через прокси
     const fileUrl = `/api/proxy-file?key=${encodeURIComponent(key)}`
