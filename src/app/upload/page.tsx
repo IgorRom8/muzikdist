@@ -163,7 +163,6 @@ function UploadContent() {
               onChange={handleFileSelect}
               id="audioFile"
               className={styles.hiddenInput}
-              required
             />
             <label htmlFor="audioFile" className={styles.fileLabel}>
               {selectedFile ? selectedFile.name : 'Выберите аудиофайл (MP3, WAV)'}
