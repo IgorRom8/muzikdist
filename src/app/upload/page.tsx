@@ -65,24 +65,22 @@ function UploadContent() {
   }
 
   const uploadFile = async (file: File): Promise<string> => {
-    // Получаем presigned URL с сервера
-    const res = await fetch('/api/upload-url', {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('fileName', file.name)
+
+    const res = await fetch('/api/upload-proxy', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName: file.name, fileType: file.type })
+      body: formData,
     })
 
-    if (!res.ok) throw new Error('Ошибка получения URL для загрузки')
-    const { uploadUrl, fileUrl } = await res.json()
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Ошибка загрузки файла')
+    }
 
-    // PUT без Content-Type заголовка — избегаем CORS preflight
-    const uploadRes = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file
-    })
-
-    if (!uploadRes.ok) throw new Error('Ошибка загрузки файла в S3')
-    return fileUrl
+    const { url } = await res.json()
+    return url
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
