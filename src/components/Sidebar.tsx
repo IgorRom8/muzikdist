@@ -45,20 +45,33 @@ export default function Sidebar() {
           <span>Поиск</span>
         </Link>
 
-        <Link 
-          href="/upload" 
-          className={`${styles.navItem} ${pathname === '/upload' ? styles.active : ''}`}
-          onClick={handleUploadClick}
-        >
-          <span>Загрузить</span>
-        </Link>
+        {user?.role !== 'ADMIN' && (
+          <Link 
+            href="/upload" 
+            className={`${styles.navItem} ${pathname === '/upload' ? styles.active : ''}`}
+            onClick={handleUploadClick}
+          >
+            <span>Загрузить</span>
+          </Link>
+        )}
 
-        <Link 
-          href="/playlists" 
-          className={`${styles.navItem} ${pathname === '/playlists' ? styles.active : ''}`}
-        >
-          <span>Плейлисты</span>
-        </Link>
+        {user?.role !== 'ADMIN' && (
+          <Link 
+            href="/playlists" 
+            className={`${styles.navItem} ${pathname === '/playlists' ? styles.active : ''}`}
+          >
+            <span>Плейлисты</span>
+          </Link>
+        )}
+
+        {user?.role === 'ADMIN' && (
+          <Link
+            href="/admin"
+            className={`${styles.navItem} ${pathname === '/admin' ? styles.active : ''}`}
+          >
+            <span>Admin</span>
+          </Link>
+        )}
       </nav>
 
       <div className={styles.playlists}>
