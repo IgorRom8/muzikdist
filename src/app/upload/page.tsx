@@ -50,15 +50,6 @@ function UploadContent() {
     }
   }
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = error => reject(error)
-    })
-  }
-
   const getAudioDuration = (file: File): Promise<number> => {
     return new Promise((resolve) => {
       const audio = new Audio()
@@ -73,6 +64,25 @@ function UploadContent() {
     })
   }
 
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('fileName', file.name)
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!response.ok) {
+      const err = await response.json()
+      throw new Error(err.error || 'Ошибка загрузки файла')
+    }
+
+    const { url } = await response.json()
+    return url
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -84,67 +94,15 @@ function UploadContent() {
     setIsUploading(true)
 
     try {
-      // Получаем длительность аудио
       const duration = await getAudioDuration(selectedFile)
 
-      // Загружаем аудиофайл напрямую в S3
-      console.log('Uploading audio file...')
-      const audioUploadUrl = await fetch('/api/upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedFile.name,
-          fileType: selectedFile.type
-        })
-      })
+      // Загружаем аудио через сервер (без прямого доступа к S3)
+      const audioUrl = await uploadFile(selectedFile)
 
-      if (!audioUploadUrl.ok) {
-        throw new Error('Ошибка получения URL для загрузки аудио')
-      }
-
-      const { uploadUrl: audioUploadUrlSigned, fileUrl: audioUrl } = await audioUploadUrl.json()
-
-      // Загружаем файл напрямую в S3
-      const audioUploadResponse = await fetch(audioUploadUrlSigned, {
-        method: 'PUT',
-        body: selectedFile,
-        headers: {
-          'Content-Type': selectedFile.type
-        }
-      })
-
-      if (!audioUploadResponse.ok) {
-        throw new Error('Ошибка загрузки аудиофайла в S3')
-      }
-
-      // Загружаем обложку в S3 (если есть)
+      // Загружаем обложку если есть
       let coverUrl = ''
       if (coverFile) {
-        console.log('Uploading cover image...')
-        const coverUploadUrl = await fetch('/api/upload-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileName: coverFile.name,
-            fileType: coverFile.type
-          })
-        })
-
-        if (coverUploadUrl.ok) {
-          const { uploadUrl: coverUploadUrlSigned, fileUrl: coverFileUrl } = await coverUploadUrl.json()
-          
-          const coverUploadResponse = await fetch(coverUploadUrlSigned, {
-            method: 'PUT',
-            body: coverFile,
-            headers: {
-              'Content-Type': coverFile.type
-            }
-          })
-
-          if (coverUploadResponse.ok) {
-            coverUrl = coverFileUrl
-          }
-        }
+        coverUrl = await uploadFile(coverFile)
       }
 
       // Создаем трек в базе данных
