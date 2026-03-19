@@ -119,7 +119,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         }
 
         // Если это новый трек, загружаем его
-        if (audio.src !== currentTrack.audioUrl) {
+        const currentSrc = audio.src
+        const newSrc = currentTrack.audioUrl.startsWith('http')
+          ? currentTrack.audioUrl
+          : `${window.location.origin}${currentTrack.audioUrl}`
+
+        if (currentSrc !== newSrc) {
           // Останавливаем текущее воспроизведение
           audio.pause()
           audio.currentTime = 0
