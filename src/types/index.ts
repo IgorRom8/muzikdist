@@ -15,6 +15,8 @@ export interface Track {
   audioUrl: string
   genre: string
   uploader?: string
+  playCount?: number
+  createdAt?: string
 }
 
 export interface Playlist {

@@ -193,6 +193,7 @@ export default function PlaylistsPage() {
                 <label>Название плейлиста</label>
                 <input
                   type="text"
+                  className={styles.input}
                   value={newPlaylistName}
                   onChange={(e) => setNewPlaylistName(e.target.value)}
                   placeholder="Введите название"
@@ -202,6 +203,7 @@ export default function PlaylistsPage() {
               <div className={styles.formGroup}>
                 <label>Описание (необязательно)</label>
                 <textarea
+                  className={styles.input}
                   value={newPlaylistDescription}
                   onChange={(e) => setNewPlaylistDescription(e.target.value)}
                   placeholder="Введите описание"

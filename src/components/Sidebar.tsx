@@ -28,20 +28,15 @@ export default function Sidebar() {
           href="/" 
           className={`${styles.navItem} ${pathname === '/' ? styles.active : ''}`}
         >
+          <span className={styles.icon}>♫</span>
           <span>Главная</span>
-        </Link>
-        
-        <Link 
-          href="/discover" 
-          className={`${styles.navItem} ${pathname === '/discover' ? styles.active : ''}`}
-        >
-          <span>Открыть новое</span>
         </Link>
         
         <Link 
           href="/search" 
           className={`${styles.navItem} ${pathname === '/search' ? styles.active : ''}`}
         >
+          <span className={styles.icon}>⌕</span>
           <span>Поиск</span>
         </Link>
 
@@ -51,6 +46,7 @@ export default function Sidebar() {
             className={`${styles.navItem} ${pathname === '/upload' ? styles.active : ''}`}
             onClick={handleUploadClick}
           >
+            <span className={styles.icon}>↑</span>
             <span>Загрузить</span>
           </Link>
         )}
@@ -60,6 +56,7 @@ export default function Sidebar() {
             href="/playlists" 
             className={`${styles.navItem} ${pathname === '/playlists' ? styles.active : ''}`}
           >
+            <span className={styles.icon}>☰</span>
             <span>Плейлисты</span>
           </Link>
         )}
@@ -69,6 +66,7 @@ export default function Sidebar() {
             href="/admin"
             className={`${styles.navItem} ${pathname === '/admin' ? styles.active : ''}`}
           >
+            <span className={styles.icon}>⚙</span>
             <span>Admin</span>
           </Link>
         )}
@@ -80,17 +78,6 @@ export default function Sidebar() {
             </div>
         </div>
       </div>
-
-      {!user && (
-        <div className={styles.authSection}>
-          <Link href="/auth?mode=login" className={styles.authButton}>
-            Вход
-          </Link>
-          <Link href="/auth?mode=register" className={styles.authButton}>
-            Регистрация
-          </Link>
-        </div>
-      )}
     </aside>
   )
 }

@@ -39,6 +39,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const currentTrackRef = useRef<Track | null>(null)
   const queueRef = useRef<Track[]>([])
   const isPlayingRef = useRef(false)
+  const lastPlayRecordedRef = useRef<{ id: string; at: number } | null>(null)
 
   currentTrackRef.current = currentTrack
   queueRef.current = queue
@@ -118,6 +119,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.pause()
     }
   }, [isPlaying])
+
+  // Учёт прослушивания (не чаще 1 раза в 8 сек на тот же трек)
+  useEffect(() => {
+    if (!isPlaying || !currentTrack) return
+
+    const now = Date.now()
+    const last = lastPlayRecordedRef.current
+    if (last?.id === currentTrack.id && now - last.at < 8000) return
+
+    lastPlayRecordedRef.current = { id: currentTrack.id, at: now }
+    fetch(`/api/tracks/${currentTrack.id}/play`, { method: 'POST' }).catch(() => {})
+  }, [isPlaying, currentTrack])
 
   const playTrack = (track: Track) => {
     setCurrentTrack(track)

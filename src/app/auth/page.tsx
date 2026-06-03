@@ -75,6 +75,7 @@ function AuthForm() {
               <input
                 id="name"
                 type="text"
+                className={styles.input}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -88,6 +89,7 @@ function AuthForm() {
             <input
               id="email"
               type="email"
+              className={styles.input}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -100,6 +102,7 @@ function AuthForm() {
             <input
               id="password"
               type="password"
+              className={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -114,6 +117,7 @@ function AuthForm() {
               <input
                 id="confirmPassword"
                 type="password"
+                className={styles.input}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
