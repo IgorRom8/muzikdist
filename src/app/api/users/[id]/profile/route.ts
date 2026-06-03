@@ -43,7 +43,7 @@ export async function GET(
         }),
       ])
 
-    const genres = [...new Set(tracks.map((t) => t.genre).filter(Boolean))]
+    const genres = Array.from(new Set(tracks.map((t) => t.genre).filter(Boolean)))
     const totalPlays = playsAgg._sum.playCount ?? 0
     const topTrack = tracks.length > 0 ? tracks[0] : null
 
