@@ -1,5 +1,6 @@
 .sidebar {
   width: var(--sidebar-width);
+  flex-shrink: 0;
   background: var(--panel-bg);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
@@ -11,13 +12,26 @@
   gap: 0.5rem;
 }
 
+.backdrop {
+  display: none;
+}
+
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
   padding: 0.625rem 1rem;
   background: linear-gradient(180deg, var(--titlebar-from) 0%, var(--titlebar-mid) 50%, var(--titlebar-to) 100%);
   border: 1px solid var(--titlebar-border);
   border-radius: var(--radius-md);
   box-shadow: var(--titlebar-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.logoIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+  display: none;
 }
 
 .logoText {
@@ -75,58 +89,71 @@
   opacity: 1;
 }
 
-.playlists {
+.navLabel {
   flex: 1;
-  overflow-y: auto;
-  border-top: 1px solid var(--panel-border-dark);
-  padding-top: 0.75rem;
-  margin-top: 0.25rem;
+  min-width: 0;
 }
 
-.playlistsList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.playlistItem {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.45rem 0.75rem;
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--duration-fast);
-  font-size: 0.875rem;
-}
-
-.playlistItem:hover {
-  background: var(--accent-soft);
+.navBadge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  background: #e03030;
+  color: #fff;
+  border-radius: var(--radius-xl);
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    width: 72px;
-    padding: 0.75rem 0.5rem;
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 8990;
+    border: none;
+    padding: 0;
+    background: rgba(10, 20, 40, 0.5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    cursor: pointer;
+    animation: fadeIn 0.2s var(--ease-out);
   }
 
-  .navItem span:last-child {
-    display: none;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 9000;
+    width: min(280px, 85vw);
+    transform: translateX(-105%);
+    transition: transform 0.28s var(--ease-out);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .logoIcon {
+    display: block;
   }
 
   .logoText {
-    font-size: 0.75rem;
-    text-align: center;
-  }
-
-  .navItem {
-    justify-content: center;
-    padding: 0.6rem;
-  }
-
-  .icon {
-    font-size: 1.15rem;
-    width: auto;
+    font-size: 1rem;
   }
 }

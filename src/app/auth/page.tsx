@@ -8,7 +8,7 @@ import styles from './auth.module.css'
 function AuthForm() {
   const searchParams = useSearchParams()
   const mode = searchParams.get('mode')
-  const [isLogin, setIsLogin] = useState(mode !== 'register')
+  const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')

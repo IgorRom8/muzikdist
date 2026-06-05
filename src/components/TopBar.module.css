@@ -5,9 +5,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   box-shadow: var(--titlebar-glow);
   position: relative;
+  z-index: 100;
+}
+
+.menuBtn {
+  display: none;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.menuIcon {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  box-shadow:
+    0 -6px 0 #fff,
+    0 6px 0 #fff;
 }
 
 .topBar::after {
@@ -27,12 +53,23 @@
 }
 
 .searchInput {
-  composes: retro-input from global;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--panel-border-dark);
+  border-top-color: rgba(100, 96, 88, 0.6);
+  border-left-color: rgba(100, 96, 88, 0.6);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
   width: 100%;
   padding: 0.55rem 1rem 0.55rem 2.25rem;
   font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.95);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.searchInput:focus {
+  outline: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 3px var(--accent-glow);
+  border-color: var(--accent);
 }
 
 .search::before {
@@ -45,6 +82,25 @@
   font-size: 1rem;
   z-index: 2;
   pointer-events: none;
+}
+
+.searchPlaceholder {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.userSectionPlaceholder {
+  min-width: 100px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.logoutIcon {
+  display: none;
 }
 
 .userSection {
@@ -86,7 +142,15 @@
 }
 
 .logoutButton {
-  composes: retro-btn from global;
+  background: linear-gradient(180deg, #f4f2ea 0%, var(--panel-bg-solid) 55%, #d4d0c0 100%);
+  color: var(--text-primary);
+  border: 1px solid var(--panel-border-dark);
+  border-top-color: var(--panel-border-light);
+  border-left-color: var(--panel-border-light);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), var(--panel-inset);
   padding: 0.4rem 0.875rem;
   font-size: 0.825rem;
 }
@@ -114,17 +178,78 @@
 }
 
 .registerButton {
-  composes: retro-btn from global;
+  background: linear-gradient(180deg, #f4f2ea 0%, var(--panel-bg-solid) 55%, #d4d0c0 100%);
+  color: var(--text-primary);
+  border: 1px solid var(--panel-border-dark);
+  border-top-color: var(--panel-border-light);
+  border-left-color: var(--panel-border-light);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), var(--panel-inset);
   padding: 0.4rem 0.875rem;
   font-size: 0.875rem;
 }
 
 @media (max-width: 768px) {
   .topBar {
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .menuBtn {
+    display: flex;
+  }
+
+  .search {
+    min-width: 0;
+  }
+
+  .searchInput {
+    padding: 0.5rem 0.75rem 0.5rem 2rem;
+    font-size: 0.85rem;
   }
 
   .userName {
+    display: none;
+  }
+
+  .userInfo {
+    padding: 0.2rem;
+  }
+
+  .logoutText {
+    display: none;
+  }
+
+  .logoutIcon {
+    display: block;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .logoutButton {
+    padding: 0.4rem 0.55rem;
+    min-width: 36px;
+  }
+
+  .registerButton {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .loginButton {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .userSectionPlaceholder {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 400px) {
+  .registerButton {
     display: none;
   }
 }

@@ -1,11 +1,11 @@
 .card {
+  position: relative;
   background: var(--panel-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--panel-border-light);
   border-radius: var(--radius-md);
   padding: 0.75rem;
-  cursor: pointer;
   transition:
     transform var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out),
@@ -24,11 +24,16 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.cardTop {
+  position: relative;
+  margin-bottom: 0.625rem;
+}
+
 .coverContainer {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  margin-bottom: 0.625rem;
+  cursor: pointer;
   overflow: hidden;
   border-radius: var(--radius-sm);
   border: 1px solid var(--panel-border-dark);
@@ -72,8 +77,30 @@
   opacity: 1;
 }
 
+@media (hover: none) {
+  .playOverlay {
+    opacity: 1;
+    background: linear-gradient(180deg, transparent 50%, rgba(0, 84, 227, 0.55) 100%);
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 0.625rem;
+  }
+
+  .moreMenu {
+    min-width: 140px;
+    right: 0;
+    left: auto;
+  }
+}
+
 .playButton {
-  composes: retro-btn from global;
   width: 46px;
   height: 46px;
   font-size: 1.2rem;
@@ -82,10 +109,79 @@
   justify-content: center;
   border-radius: 50%;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(180deg, #f4f2ea 0%, #ece9d8 100%);
+  border: 1px solid var(--panel-border-dark);
+  cursor: pointer;
 }
 
 .playButton:hover {
   transform: scale(1.08);
+}
+
+.moreWrap {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 12;
+}
+
+.moreButton {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--panel-border-dark);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: background var(--duration-fast);
+}
+
+.moreButton:hover {
+  background: #fff;
+  color: var(--accent);
+}
+
+.moreMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 160px;
+  background: var(--panel-bg-solid);
+  border: 1px solid var(--panel-border-dark);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.reportButton {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.875rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a00000;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.reportButton:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffe8e8, #ffc0c0);
+}
+
+.reportButton:disabled {
+  color: var(--text-muted);
+  cursor: default;
 }
 
 .info {
@@ -133,10 +229,14 @@
 }
 
 .addButton {
-  composes: retro-btn from global;
   width: 100%;
   padding: 0.3rem 0.625rem;
   font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #f4f2ea 0%, #ece9d8 100%);
+  border: 1px solid var(--panel-border-dark);
+  cursor: pointer;
 }
 
 .playlistMenu {
@@ -175,4 +275,188 @@
   text-align: center;
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+.reportOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  background: rgba(20, 18, 14, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: reportOverlayIn 0.2s var(--ease-out);
+}
+
+@keyframes reportOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.reportModal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: min(90vh, 520px);
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  background: var(--panel-bg-solid);
+  border: 1px solid var(--panel-border-dark);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.28),
+    var(--panel-inset);
+  animation: reportModalIn 0.22s var(--ease-out);
+}
+
+@keyframes reportModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reportCloseBtn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--panel-border-dark);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--duration-fast),
+    background var(--duration-fast);
+}
+
+.reportCloseBtn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: #fff;
+}
+
+.reportCloseBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reportForm,
+.reportSuccess {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-right: 1.5rem;
+}
+
+.reportTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.reportSubtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.reportLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.reportTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--panel-border-dark);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+  min-height: 96px;
+}
+
+.reportTextarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.reportTextarea:disabled {
+  opacity: 0.6;
+}
+
+.reportError {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a00000;
+}
+
+.reportActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.reportCancelBtn {
+  padding: 0.45rem 0.875rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--panel-border-dark);
+  color: var(--text-secondary);
+}
+
+.reportCancelBtn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.reportSubmitBtn {
+  padding: 0.45rem 1rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #ffe8e8 0%, #ffc0c0 100%);
+  border: 1px solid #e03030;
+  color: #a00000;
+}
+
+.reportSubmitBtn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffd0d0 0%, #ffa0a0 100%);
+}
+
+.reportSubmitBtn:disabled,
+.reportCancelBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

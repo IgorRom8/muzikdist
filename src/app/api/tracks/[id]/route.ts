@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/nextauth'
+import { notifyTrackDeletedByAdmin } from '@/lib/notifications'
 import { prisma } from '@/lib/prisma'
 
 export async function DELETE(
@@ -22,6 +23,13 @@ export async function DELETE(
   // Удалять может владелец или admin
   if (track.userId !== session.user.id && session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Нет прав' }, { status: 403 })
+  }
+
+  const deletedByAdmin =
+    session.user.role === 'ADMIN' && track.userId !== session.user.id
+
+  if (deletedByAdmin) {
+    await notifyTrackDeletedByAdmin(track.userId, track.title)
   }
 
   await prisma.track.delete({ where: { id } })

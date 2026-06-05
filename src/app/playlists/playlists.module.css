@@ -1,13 +1,24 @@
 .app {
-  composes: app from '../page.module.css';
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .mainContent {
-  composes: mainContent from '../page.module.css';
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(240, 237, 226, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .content {
-  composes: content from '../page.module.css';
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--content-padding);
+  padding-bottom: calc(var(--player-height) + 2rem);
 }
 
 .header {
@@ -18,17 +29,25 @@
 }
 
 .title {
-  composes: sectionTitle from '../page.module.css';
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
   margin-bottom: 0;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 100%);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .createButton {
-  composes: retro-btn from global;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
   background: linear-gradient(180deg, var(--titlebar-from) 0%, var(--titlebar-to) 100%);
   color: var(--text-on-accent);
-  border-color: var(--titlebar-border);
+  border: 1px solid var(--titlebar-border);
 }
 
 .createButton:hover {
@@ -58,16 +77,30 @@
 }
 
 .input {
-  composes: retro-input from global;
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--panel-border-dark);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--accent);
 }
 
 .submitButton {
-  composes: retro-btn from global;
   padding: 0.5rem 1.25rem;
   font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #f4f2ea 0%, #ece9d8 100%);
+  border: 1px solid var(--panel-border-dark);
 }
 
 .emptyMessage {
@@ -94,9 +127,7 @@
   border-radius: var(--radius-md);
   padding: 0.875rem;
   cursor: pointer;
-  transition:
-    transform var(--duration-normal) var(--ease-out),
-    box-shadow var(--duration-normal);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -155,7 +186,6 @@
   overflow: hidden;
   border: 2px dashed var(--panel-border-dark);
   cursor: pointer;
-  transition: border-color var(--duration-fast);
 }
 
 .coverLabel:hover {
@@ -177,11 +207,6 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: background var(--duration-fast);
-}
-
-.coverPlaceholder:hover {
-  background: var(--accent-soft);
 }
 
 .coverPlaceholder span {
@@ -198,4 +223,41 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: var(--content-padding);
+    padding-bottom: calc(var(--player-height) + 1.5rem + var(--safe-bottom));
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .createButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .playlistsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .coverLabel {
+    width: 120px;
+    height: 120px;
+  }
+
+  .createForm {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .playlistsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Sidebar from '@/components/Sidebar'
@@ -14,11 +14,25 @@ function fileNameToTitle(name: string): string {
   return name.replace(/\.[^/.]+$/, '').trim() || name
 }
 
+type AlbumTrackItem = {
+  id: string
+  file: File
+  title: string
+}
+
+function createAlbumTrackItem(file: File): AlbumTrackItem {
+  return {
+    id: crypto.randomUUID(),
+    file,
+    title: fileNameToTitle(file.name),
+  }
+}
+
 function UploadContent() {
   const router = useRouter()
   const { user, isLoading } = useAuth()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [albumTracks, setAlbumTracks] = useState<AlbumTrackItem[]>([])
   const [title, setTitle] = useState('')
   const [type, setType] = useState<'album' | 'single'>('single')
   const [album, setAlbum] = useState('')
@@ -27,6 +41,8 @@ function UploadContent() {
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
+  const [isDragOver, setIsDragOver] = useState(false)
+  const audioInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -37,8 +53,44 @@ function UploadContent() {
   const handleTypeChange = (newType: 'album' | 'single') => {
     setType(newType)
     setSelectedFile(null)
-    setSelectedFiles([])
+    setAlbumTracks([])
     setTitle('')
+  }
+
+  const mergeAlbumTracks = (prev: AlbumTrackItem[], incoming: File[]) => {
+    const merged = [...prev]
+    for (const file of incoming) {
+      const duplicate = merged.some(
+        (item) =>
+          item.file.name === file.name &&
+          item.file.size === file.size &&
+          item.file.lastModified === file.lastModified
+      )
+      if (!duplicate) merged.push(createAlbumTrackItem(file))
+    }
+    return merged
+  }
+
+  const isAudioFile = (file: File) =>
+    file.type.startsWith('audio/') || /\.(mp3|wav|flac|ogg|m4a)$/i.test(file.name)
+
+  const addAlbumFiles = (files: FileList | File[]) => {
+    const audioOnly = Array.from(files).filter(isAudioFile)
+    if (audioOnly.length === 0) {
+      alert('Выберите аудиофайлы (MP3, WAV и др.)')
+      return
+    }
+    setAlbumTracks((prev) => mergeAlbumTracks(prev, audioOnly))
+  }
+
+  const updateAlbumTrackTitle = (index: number, title: string) => {
+    setAlbumTracks((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, title } : item))
+    )
+  }
+
+  const openAlbumFilePicker = () => {
+    audioInputRef.current?.click()
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,11 +98,31 @@ function UploadContent() {
     if (!files?.length) return
 
     if (type === 'album') {
-      setSelectedFiles(Array.from(files))
+      addAlbumFiles(files)
     } else {
       setSelectedFile(files[0])
     }
     e.target.value = ''
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!isAlbum || isUploading) return
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    if (!isAlbum || isUploading) return
+    e.preventDefault()
+    setIsDragOver(false)
+    if (e.dataTransfer.files.length) {
+      addAlbumFiles(e.dataTransfer.files)
+    }
   }
 
   const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,8 +131,8 @@ function UploadContent() {
     }
   }
 
-  const removeAlbumFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+  const removeAlbumTrack = (index: number) => {
+    setAlbumTracks((prev) => prev.filter((_, i) => i !== index))
   }
 
   const getAudioDuration = (file: File): Promise<number> => {
@@ -130,7 +202,7 @@ function UploadContent() {
 
   const resetForm = () => {
     setSelectedFile(null)
-    setSelectedFiles([])
+    setAlbumTracks([])
     setTitle('')
     setType('single')
     setAlbum('')
@@ -190,7 +262,7 @@ function UploadContent() {
     }
 
     // Альбом — несколько треков
-    if (selectedFiles.length === 0) {
+    if (albumTracks.length === 0) {
       alert('Выберите один или несколько аудиофайлов для альбома')
       return
     }
@@ -207,25 +279,44 @@ function UploadContent() {
         coverUrl = await uploadFile(coverFile)
       }
 
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i]
-        setUploadProgress(`Загрузка ${i + 1} из ${selectedFiles.length}: ${file.name}`)
-        const audioUrl = await uploadFile(file)
-        await createTrack(
-          file,
-          fileNameToTitle(file.name),
-          audioUrl,
-          coverUrl,
-          resolvedGenre,
-          albumName
+      let uploadedCount = 0
+      const errors: string[] = []
+
+      for (let i = 0; i < albumTracks.length; i++) {
+        const { file, title: trackTitle } = albumTracks[i]
+        const displayTitle =
+          trackTitle.trim() || fileNameToTitle(file.name)
+        setUploadProgress(
+          `Загрузка ${i + 1} из ${albumTracks.length}: ${displayTitle}`
         )
+        try {
+          const audioUrl = await uploadFile(file)
+          await createTrack(
+            file,
+            displayTitle,
+            audioUrl,
+            coverUrl,
+            resolvedGenre,
+            albumName
+          )
+          uploadedCount++
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Ошибка'
+          errors.push(`${displayTitle}: ${msg}`)
+        }
       }
 
-      alert(
-        `Альбом «${albumName}» загружен: ${selectedFiles.length} ${
-          selectedFiles.length === 1 ? 'трек' : selectedFiles.length < 5 ? 'трека' : 'треков'
-        }`
-      )
+      if (uploadedCount === 0) {
+        throw new Error(errors.join('\n') || 'Не удалось загрузить треки')
+      }
+
+      const suffix =
+        uploadedCount === 1 ? 'трек' : uploadedCount < 5 ? 'трека' : 'треков'
+      const warn =
+        errors.length > 0
+          ? `\n\nНе загружены (${errors.length}):\n${errors.join('\n')}`
+          : ''
+      alert(`Альбом «${albumName}»: ${uploadedCount} ${suffix}${warn}`)
       resetForm()
       router.push('/')
     } catch (error) {
@@ -329,50 +420,124 @@ function UploadContent() {
           <h2 className={styles.sectionTitle}>
             {isAlbum ? 'Треки альбома' : 'Аудиофайл'}
           </h2>
-          <div className={styles.fileInput}>
-            <input
-              type="file"
-              accept="audio/*,.mp3,.wav"
-              multiple={isAlbum}
-              onChange={handleFileSelect}
-              id="audioFile"
-              className={styles.hiddenInput}
-              disabled={isUploading}
-            />
-            <label htmlFor="audioFile" className={styles.fileLabel}>
-              {isAlbum
-                ? selectedFiles.length > 0
-                  ? `Выбрано файлов: ${selectedFiles.length}`
-                  : 'Выберите несколько треков (MP3, WAV) — можно несколько сразу'
-                : selectedFile
-                  ? selectedFile.name
-                  : 'Выберите аудиофайл (MP3, WAV)'}
-            </label>
-          </div>
+          <input
+            ref={audioInputRef}
+            type="file"
+            accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a"
+            multiple={isAlbum}
+            onChange={handleFileSelect}
+            id="audioFile"
+            className={styles.hiddenInput}
+            disabled={isUploading}
+          />
 
-          {isAlbum && selectedFiles.length > 0 && (
-            <ul className={styles.fileList}>
-              {selectedFiles.map((file, index) => (
-                <li key={`${file.name}-${index}`} className={styles.fileListItem}>
-                  <span className={styles.fileListNum}>{index + 1}</span>
-                  <span className={styles.fileListName} title={file.name}>
-                    {fileNameToTitle(file.name)}
+          {isAlbum ? (
+            <div
+              className={`${styles.dropZone} ${isDragOver ? styles.dropZoneActive : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {albumTracks.length === 0 ? (
+                <button
+                  type="button"
+                  className={styles.dropZoneEmpty}
+                  onClick={openAlbumFilePicker}
+                  disabled={isUploading}
+                >
+                  <span className={styles.dropZoneIcon}>♪</span>
+                  <span className={styles.dropZoneTitle}>
+                    Выберите треки или перетащите сюда
                   </span>
-                  <span className={styles.fileListMeta}>
-                    {(file.size / 1024 / 1024).toFixed(1)} МБ
+                  <span className={styles.dropZoneSub}>
+                    MP3, WAV — можно несколько сразу (Ctrl / Shift)
                   </span>
-                  <button
-                    type="button"
-                    className={styles.fileListRemove}
-                    onClick={() => removeAlbumFile(index)}
-                    disabled={isUploading}
-                    aria-label="Удалить из списка"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
+                </button>
+              ) : (
+                <>
+                  <div className={styles.fileListHeader}>
+                    <span className={styles.fileListCount}>
+                      В альбоме: {albumTracks.length}{' '}
+                      {albumTracks.length === 1
+                        ? 'трек'
+                        : albumTracks.length < 5
+                          ? 'трека'
+                          : 'треков'}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.clearListButton}
+                      onClick={() => setAlbumTracks([])}
+                      disabled={isUploading}
+                    >
+                      Очистить
+                    </button>
+                  </div>
+                  <ul className={styles.fileList}>
+                    {albumTracks.map((track, index) => (
+                      <li key={track.id} className={styles.fileListItem}>
+                        <span className={styles.fileListNum}>{index + 1}</span>
+                        <div className={styles.fileListMain}>
+                          <input
+                            type="text"
+                            className={styles.trackTitleInput}
+                            value={track.title}
+                            onChange={(e) =>
+                              updateAlbumTrackTitle(index, e.target.value)
+                            }
+                            placeholder="Название трека"
+                            disabled={isUploading}
+                            aria-label={`Название трека ${index + 1}`}
+                          />
+                          <span
+                            className={styles.fileListFileName}
+                            title={track.file.name}
+                          >
+                            {track.file.name}
+                          </span>
+                        </div>
+                        <span className={styles.fileListMeta}>
+                          {(track.file.size / 1024 / 1024).toFixed(1)} МБ
+                        </span>
+                        <button
+                          type="button"
+                          className={styles.fileListRemove}
+                          onClick={() => removeAlbumTrack(index)}
+                          disabled={isUploading}
+                          aria-label="Удалить из списка"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              <div className={styles.addFilesRow}>
+                <button
+                  type="button"
+                  className={styles.addFilesButton}
+                  onClick={openAlbumFilePicker}
+                  disabled={isUploading}
+                >
+                  + Докинуть файл
+                </button>
+                {isDragOver && (
+                  <span className={styles.dropHint}>Отпустите, чтобы добавить</span>
+                )}
+              </div>
+              <p className={styles.hint}>
+                Каждый новый выбор или перетаскивание дополняет список. Название
+                трека можно изменить в поле рядом с файлом.
+              </p>
+            </div>
+          ) : (
+            <div className={styles.fileInput}>
+              <label htmlFor="audioFile" className={styles.fileLabel}>
+                {selectedFile ? selectedFile.name : 'Выберите аудиофайл (MP3, WAV)'}
+              </label>
+            </div>
           )}
         </div>
 
@@ -420,8 +585,8 @@ function UploadContent() {
           {isUploading
             ? 'Загрузка...'
             : isAlbum
-              ? selectedFiles.length > 0
-                ? `Загрузить альбом (${selectedFiles.length})`
+              ? albumTracks.length > 0
+                ? `Загрузить альбом (${albumTracks.length})`
                 : 'Загрузить альбом'
               : 'Загрузить трек'}
         </button>

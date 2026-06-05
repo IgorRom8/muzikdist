@@ -15,6 +15,15 @@ enum Role {
   ADMIN
 }
 
+enum ReportStatus {
+  PENDING
+  REVIEWED
+}
+
+enum NotificationType {
+  TRACK_DELETED
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -25,9 +34,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tracks    Track[]
-  playlists Playlist[]
-  favorites Favorite[]
+  tracks        Track[]
+  playlists     Playlist[]
+  favorites     Favorite[]
+  reports       Report[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -50,8 +61,24 @@ model Track {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   playlistTracks    PlaylistTrack[]
   favorites         Favorite[]
+  reports           Report[]
 
   @@map("tracks")
+}
+
+model Report {
+  id           String       @id @default(cuid())
+  trackId      String
+  reporterId   String?
+  reporterName String       @default("Гость")
+  message      String?
+  status       ReportStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+
+  track    Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  reporter User? @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@map("reports")
 }
 
 model Playlist {
@@ -95,4 +122,19 @@ model Favorite {
 
   @@unique([userId, trackId])
   @@map("favorites")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
 }

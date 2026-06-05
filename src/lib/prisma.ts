@@ -4,6 +4,22 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+function createPrismaClient() {
+  return new PrismaClient()
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+function getPrisma(): PrismaClient {
+  const cached = globalForPrisma.prisma
+  // После добавления моделей старый кэш в dev не содержит новых делегатов
+  if (cached && 'notification' in cached) {
+    return cached
+  }
+
+  const client = createPrismaClient()
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = client
+  }
+  return client
+}
+
+export const prisma = getPrisma()

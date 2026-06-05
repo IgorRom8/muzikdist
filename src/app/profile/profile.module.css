@@ -422,16 +422,39 @@
 
 @media (max-width: 768px) {
   .content {
-    padding: 1rem;
-    padding-bottom: calc(var(--player-height) + 1.5rem);
+    padding: var(--content-padding);
+    padding-bottom: calc(var(--player-height) + 1.5rem + var(--safe-bottom));
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .metricCard {
+    padding: 0.75rem;
+  }
+
+  .trackCell {
+    min-width: 0;
   }
 
   .trackTitle {
-    max-width: 120px;
+    max-width: none;
   }
 
   .colGenre,
   .colDate {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .profileName {
+    font-size: 1.35rem;
   }
 }

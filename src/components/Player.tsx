@@ -1,25 +1,46 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { createPortal } from 'react-dom'
 import { usePlayer } from '@/context/PlayerContext'
+import { useMounted } from '@/hooks/useMounted'
 import styles from './Player.module.css'
 
 export default function Player() {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    currentTime, 
+  const {
+    currentTrack,
+    isPlaying,
+    currentTime,
     duration,
     volume,
     isPlayerVisible,
-    togglePlay, 
-    nextTrack, 
+    togglePlay,
+    nextTrack,
     previousTrack,
     seek,
     setVolume,
-    hidePlayer
+    hidePlayer,
   } = usePlayer()
 
-  if (!currentTrack || !isPlayerVisible) return null
+  const [isExpanded, setIsExpanded] = useState(false)
+  const isMounted = useMounted()
+
+  useEffect(() => {
+    if (!isExpanded) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsExpanded(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isExpanded])
+
+  if (!isMounted || !currentTrack || !isPlayerVisible) return null
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00'
@@ -32,8 +53,7 @@ export default function Player() {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const percentage = x / rect.width
-    const newTime = percentage * duration
-    seek(newTime)
+    seek(percentage * duration)
   }
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,73 +65,160 @@ export default function Player() {
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     e.currentTarget.style.display = 'none'
     const placeholder = e.currentTarget.nextElementSibling as HTMLElement
-    if (placeholder) {
-      placeholder.style.display = 'flex'
-    }
+    if (placeholder) placeholder.style.display = 'flex'
   }
 
-  return (
-    <div className={styles.player}>
-      <button 
-        onClick={hidePlayer} 
-        className={styles.closeButton}
-        title="Скрыть плеер"
-      >
-        ✕
-      </button>
+  const artistLink = currentTrack.userId ? (
+    <Link
+      href={`/artist/${currentTrack.userId}`}
+      className={styles.metaLink}
+      onClick={() => setIsExpanded(false)}
+    >
+      {currentTrack.artist}
+    </Link>
+  ) : (
+    <span className={styles.artist}>{currentTrack.artist}</span>
+  )
 
-      <div className={styles.trackInfo}>
-        <div className={styles.coverWrapper}>
-          {currentTrack.coverUrl ? (
-            <img 
-              src={currentTrack.coverUrl} 
-              alt={currentTrack.title} 
-              className={styles.cover}
-              onError={handleImageError}
-            />
-          ) : null}
-          <div className={styles.coverPlaceholder} style={{ display: currentTrack.coverUrl ? 'none' : 'flex' }}>♪</div>
-        </div>
-        <div className={styles.info}>
-          <div className={styles.title}>{currentTrack.title}</div>
-          <div className={styles.artist}>{currentTrack.artist}</div>
-        </div>
-      </div>
-
-      <div className={styles.centerSection}>
-        <div className={styles.controls}>
-          <button onClick={previousTrack} className={styles.controlButton}>
-            ⏮
-          </button>
-          <button onClick={togglePlay} className={styles.playButton}>
-            {isPlaying ? '⏸' : '▶'}
-          </button>
-          <button onClick={nextTrack} className={styles.controlButton}>
-            ⏭
-          </button>
-        </div>
-
-        <div className={styles.progress}>
-          <span className={styles.time}>{formatTime(currentTime)}</span>
-          <div className={styles.progressBar} onClick={handleProgressClick}>
-            <div className={styles.progressFill} style={{ width: `${progressPercentage}%` }}></div>
-          </div>
-          <span className={styles.time}>{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      <div className={styles.volume}>
-        <span className={styles.volumeIcon}>♪</span>
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.01" 
-          value={volume}
-          onChange={handleVolumeChange}
-          className={styles.volumeSlider}
+  const coverBlock = (
+    <div className={styles.coverWrapper}>
+      {currentTrack.coverUrl ? (
+        <img
+          src={currentTrack.coverUrl}
+          alt={currentTrack.title}
+          className={styles.cover}
+          onError={handleImageError}
         />
+      ) : null}
+      <div
+        className={styles.coverPlaceholder}
+        style={{ display: currentTrack.coverUrl ? 'none' : 'flex' }}
+      >
+        ♪
       </div>
     </div>
+  )
+
+  const controlsBlock = (large?: boolean) => (
+    <>
+      <div className={large ? styles.controlsLarge : styles.controls}>
+        <button type="button" onClick={previousTrack} className={styles.controlButton}>
+          ⏮
+        </button>
+        <button
+          type="button"
+          onClick={togglePlay}
+          className={large ? styles.playButtonLarge : styles.playButton}
+        >
+          {isPlaying ? '⏸' : '▶'}
+        </button>
+        <button type="button" onClick={nextTrack} className={styles.controlButton}>
+          ⏭
+        </button>
+      </div>
+      <div className={large ? styles.progressLarge : styles.progress}>
+        <span className={styles.time}>{formatTime(currentTime)}</span>
+        <div className={styles.progressBar} onClick={handleProgressClick}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+        <span className={styles.time}>{formatTime(duration)}</span>
+      </div>
+    </>
+  )
+
+  const expandedView =
+    isMounted && isExpanded
+      ? createPortal(
+          <div className={styles.expandedOverlay} role="dialog" aria-modal="true">
+            <button
+              type="button"
+              className={styles.expandedClose}
+              onClick={() => setIsExpanded(false)}
+              aria-label="Свернуть плеер"
+            >
+              ✕
+            </button>
+            <div className={styles.expandedInner}>
+              <div className={styles.expandedCover}>{coverBlock}</div>
+              <div className={styles.expandedMeta}>
+                <h2 className={styles.expandedTitle}>{currentTrack.title}</h2>
+                <div className={styles.expandedArtist}>{artistLink}</div>
+                {currentTrack.album && (
+                  <p className={styles.expandedAlbum}>{currentTrack.album}</p>
+                )}
+              </div>
+              <div className={styles.expandedControls}>{controlsBlock(true)}</div>
+              <div className={styles.expandedVolume}>
+                <span className={styles.volumeIcon}>♪</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className={styles.volumeSliderLarge}
+                />
+              </div>
+              <button
+                type="button"
+                className={styles.collapseBtn}
+                onClick={() => setIsExpanded(false)}
+              >
+                Свернуть
+              </button>
+            </div>
+          </div>,
+          document.body
+        )
+      : null
+
+  return (
+    <>
+      <div className={styles.player}>
+        <button
+          type="button"
+          onClick={hidePlayer}
+          className={styles.closeButton}
+          title="Скрыть плеер"
+        >
+          ✕
+        </button>
+
+        <div className={styles.trackInfo}>
+          {coverBlock}
+          <div className={styles.info}>
+            <button
+              type="button"
+              className={`${styles.metaLink} ${styles.titleLink}`}
+              onClick={() => setIsExpanded(true)}
+              title="Открыть на весь экран"
+            >
+              {currentTrack.title}
+            </button>
+            {artistLink}
+          </div>
+        </div>
+
+        <div className={styles.centerSection}>{controlsBlock()}</div>
+
+        <div className={styles.volume}>
+          <span className={styles.volumeIcon}>♪</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={handleVolumeChange}
+            className={styles.volumeSlider}
+          />
+        </div>
+      </div>
+      {expandedView}
+    </>
   )
 }

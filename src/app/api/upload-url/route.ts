@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Генерируем уникальное имя файла
-    const key = `${Date.now()}-${fileName}`
+    const key = `${Date.now()}-${crypto.randomUUID()}-${fileName}`
 
     // Создаем команду для загрузки
     const command = new PutObjectCommand({

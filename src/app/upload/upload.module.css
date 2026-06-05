@@ -168,6 +168,127 @@
   color: var(--text-muted);
 }
 
+.dropZone {
+  border: 2px dashed var(--panel-border-dark);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.35);
+  transition:
+    border-color var(--duration-fast),
+    background var(--duration-fast);
+}
+
+.dropZoneActive {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dropZoneEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-ui);
+  text-align: center;
+}
+
+.dropZoneEmpty:hover:not(:disabled) {
+  background: rgba(0, 84, 227, 0.06);
+}
+
+.dropZoneEmpty:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dropZoneIcon {
+  font-size: 2rem;
+  color: var(--text-muted);
+}
+
+.dropZoneTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dropZoneSub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.fileListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  gap: 0.75rem;
+}
+
+.fileListCount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.clearListButton {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  border: 1px solid var(--panel-border-dark);
+  color: var(--text-muted);
+}
+
+.clearListButton:hover:not(:disabled) {
+  color: #a00000;
+  border-color: #e03030;
+  background: rgba(255, 200, 200, 0.35);
+}
+
+.addFilesRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.addFilesButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--titlebar-from) 0%, var(--titlebar-to) 100%);
+  border: 1px solid var(--titlebar-border);
+  color: var(--text-on-accent);
+  font-family: var(--font-ui);
+}
+
+.addFilesButton:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2aabff 0%, var(--accent) 100%);
+}
+
+.addFilesButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dropHint {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 .progress {
   font-size: 0.875rem;
   font-weight: 600;
@@ -180,19 +301,19 @@
 
 .fileList {
   list-style: none;
-  margin-top: 0.875rem;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  max-height: 220px;
+  gap: 0.5rem;
+  max-height: 320px;
   overflow-y: auto;
 }
 
 .fileListItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
-  padding: 0.45rem 0.65rem;
+  padding: 0.55rem 0.65rem;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid var(--panel-border-dark);
   border-radius: var(--radius-sm);
@@ -206,11 +327,39 @@
   min-width: 1.25rem;
 }
 
-.fileListName {
+.fileListMain {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trackTitleInput {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
   font-size: 0.85rem;
   font-weight: 600;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--panel-border-dark);
+  border-radius: var(--radius-xs);
   color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+.trackTitleInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.trackTitleInput:disabled {
+  opacity: 0.6;
+}
+
+.fileListFileName {
+  font-size: 0.7rem;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,9 +369,11 @@
   font-size: 0.75rem;
   color: var(--text-muted);
   flex-shrink: 0;
+  padding-top: 0.35rem;
 }
 
 .fileListRemove {
+  margin-top: 0.2rem;
   width: 24px;
   height: 24px;
   display: flex;
@@ -249,11 +400,19 @@
 
 @media (max-width: 768px) {
   .content {
-    padding: 1rem;
-    padding-bottom: calc(var(--player-height) + 1.5rem);
+    padding: var(--content-padding);
+    padding-bottom: calc(var(--player-height) + 1.5rem + var(--safe-bottom));
   }
 
   .formGrid {
     grid-template-columns: 1fr;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .submitBtn {
+    width: 100%;
   }
 }

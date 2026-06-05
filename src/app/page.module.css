@@ -114,13 +114,26 @@
 
 @media (max-width: 768px) {
   .content {
-    padding: 1rem;
-    padding-bottom: calc(var(--player-height) + 1.5rem);
+    padding: var(--content-padding);
+    padding-bottom: calc(var(--player-height) + 1.5rem + var(--safe-bottom));
+  }
+
+  .sectionTitle {
+    font-size: 1.15rem;
+    padding: 0.4rem 0.75rem;
   }
 
   .tracksGrid,
   .albumsGrid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .tracksGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
   }
 }

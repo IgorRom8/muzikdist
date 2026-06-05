@@ -30,7 +30,7 @@ export async function uploadToS3(
       hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY
     })
 
-    const key = `${Date.now()}-${fileName}`
+    const key = `${Date.now()}-${crypto.randomUUID()}-${fileName}`
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,

@@ -11,10 +11,11 @@ export interface Track {
   artist: string
   album: string
   duration: number
-  coverUrl: string
+  coverUrl?: string | null
   audioUrl: string
   genre: string
   uploader?: string
+  userId?: string
   playCount?: number
   createdAt?: string
 }
